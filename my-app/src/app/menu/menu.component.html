@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light p-3">
+  <a class="navbar-brand" href="#">Liga Lama</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" (click)="toggleNavbar()">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div id="navbarNav" class="collapse navbar-collapse" [class.collapse]="navbarCollapsed">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#" routerLink="/teams">Classement <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" routerLink="/players">Joueurs</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" routerLink="/rounds">Journées</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" routerLink="/import" >Import</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+      </li>
+    </ul>
+  </div>
+</nav>

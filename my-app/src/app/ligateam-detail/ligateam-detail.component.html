@@ -1,0 +1,76 @@
+<div class="container" style="margin-top: 40px">
+  <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="goBack()">Retour</a>
+</div>
+<div *ngIf="ligateam" class="container" style="margin-top: 20px">
+  <h1>Composition : {{ligateam.ligateam_name | uppercase}}</h1>
+
+  <div id="alert" *ngIf="displayAlert()" class="jumbotron rounded border border-danger p-3">
+    <h2 class="display-4">Cette équipe n'est pas conforme !</h2>
+    <p *ngIf="redError" class="lead">Le nombre de joueur de ton effectif est incorrect car tu ne disposes pas de 12 joueurs.</p>
+    <p *ngIf="yellowError" class="lead">La répartition entre titulaires et remplaçants est incorrecte.</p>
+    <p *ngIf="blueError" class="lead">Tu disposes de plus de 3 joueurs d'un même club ce qui est interdit</p>
+    <p *ngIf="darkError" class="lead">Ta composition ne respecte pas le 443 ou 442 ou 532 ou 541 ou 451. {{ unconformityMessage }} !</p>
+  </div>
+
+  <div style="margin-top: 20px">
+    <a class="btn btn-primary btn-lg active mr-2" role="button" aria-pressed="true" routerLink="/recrutement/{{ligateam.id}}">In</a>    
+    <a *ngIf="selectedPlayer" class="btn btn-primary btn-lg active mr-2" role="button" aria-pressed="true" (click)="onOut(selectedPlayer)">Out</a>
+    <a *ngIf="selectedPlayer" class="btn btn-primary btn-lg active" role="button" aria-pressed="true" (click)="onCoaching(selectedPlayer)">Coaching</a>
+  </div>
+  
+  <div *ngIf="coachSelectedPlayer" style="margin-top: 20px">
+    <h2>{{selectedPlayer.player_name | uppercase}} {{message}}</h2>
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="updatePlayerState(selectedPlayer)">Valider</a>
+    <a href="#" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Annuler</a>    
+  </div>
+  
+  <div *ngIf="outSelectedPlayer" style="margin-top: 20px">
+    <h2>{{selectedPlayer.player_name | uppercase}} {{message}}</h2>
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="updatePlayer(selectedPlayer)">Valider</a>
+    <a href="#" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Annuler</a>    
+  </div>
+
+  <div style="margin-top: 20px">
+    <h2>Titulaires</h2>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Joueur</th>
+        <th scope="col">Poste</th>
+        <th scope="col">Clubs de L1</th>        
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let lineupplayer of lineupsplayers; index as i" (click)="onSelectPlayer(lineupplayer)">
+        <td>{{i + 1}}</td>
+        <td>{{lineupplayer.player_name}}</td>
+        <td>{{lineupplayer.position}}</td>
+        <td>{{lineupplayer.l1team.l1team_name}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div>
+    <h2>Remplaçants</h2>
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Joueur</th>
+        <th scope="col">Poste</th>
+        <th scope="col">Clubs de L1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let substituteplayer of substitutesplayers; index as i" (click)="onSelectPlayer(substituteplayer)">
+        <td>{{i + 1}}</td>
+        <td>{{substituteplayer.player_name}}</td>
+        <td>{{substituteplayer.position}}</td>
+        <td>{{substituteplayer.l1team.l1team_name}}</td>
+      </tr>      
+    </tbody>
+  </table>
+</div>
+

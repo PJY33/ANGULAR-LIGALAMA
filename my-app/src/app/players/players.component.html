@@ -1,0 +1,40 @@
+
+<div class="container" style="margin-top: 40px">
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="goBack()">Retour</a>
+</div>
+<div class="container" style="margin-top: 20px">
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="sendMessage()">Message</a>
+</div>
+
+<div *ngIf="isViewModelVisible" class="container" style="margin-top: 60px">
+    <h1>Liste des joueurs</h1>
+    <mat-table [dataSource]="viewModelPlayers">
+        <ng-container  matColumnDef="index">
+          <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+          <mat-cell *matCellDef="let viewModelPlayer; let i = index">{{ i+1 }}</mat-cell>
+        </ng-container>
+        <ng-container  matColumnDef="clubl1">
+          <mat-header-cell *matHeaderCellDef>Club de L1</mat-header-cell>
+          <mat-cell *matCellDef="let viewModelPlayer">{{viewModelPlayer.l1team_name}}</mat-cell>
+        </ng-container>
+        <ng-container  matColumnDef="joueur">
+          <mat-header-cell *matHeaderCellDef>Joueur</mat-header-cell>
+          <mat-cell *matCellDef="let viewModelPlayer">{{viewModelPlayer.player_name}}</mat-cell>
+        </ng-container>
+        <ng-container  matColumnDef="poste">
+          <mat-header-cell *matHeaderCellDef>Poste</mat-header-cell>
+          <mat-cell *matCellDef="let viewModelPlayer">{{viewModelPlayer.position}}</mat-cell>
+        </ng-container>
+        <ng-container  matColumnDef="points">
+              <mat-header-cell *matHeaderCellDef>Points</mat-header-cell>
+              <mat-cell *matCellDef="let viewModelPlayer">{{viewModelPlayer.point}}</mat-cell>
+        </ng-container>
+        <ng-container  matColumnDef="clubliga">
+          <mat-header-cell *matHeaderCellDef>Club Liga</mat-header-cell>
+          <mat-cell *matCellDef="let viewModelPlayer">{{viewModelPlayer.ligateam_name}}</mat-cell>
+        </ng-container>    
+        <mat-header-row *matHeaderRowDef="tableColumns"></mat-header-row>
+        <mat-row hover *matRowDef="let row; columns: tableColumns"></mat-row>
+    </mat-table>
+</div>
+            

@@ -1,0 +1,28 @@
+<div class="container" style="margin-top: 40px">
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="goBack()">Retour</a>
+    <div *ngIf="l1teams" class="container" style="margin-top: 20px">
+        <div class="container" style="margin-top: 20px">
+            <a class="btn btn-primary btn-lg active" role="button" aria-pressed="true" (click)="getApiFTeamsByLeague()">Import des équipes de L1</a>
+            <div *ngIf="message" class="text-primary" style="margin-top: 20px">
+                <h2>{{message}}</h2> 
+            </div>
+            <h1 style="margin-top: 20px">Liste des équipes de L1</h1>
+            <table class="table table-hover" style="margin-top: 20px">
+                <thead>
+                    <tr>
+                        <th scope="col">Equipe</th>                            
+                        <th scope="col"></th>                            
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let l1team of l1teams" (click)="onSelectL1Team(l1team)">
+                        <td class="imgtab">
+                            <img src="{{l1team.logo}}" alt="image"/>
+                        </td>
+                        <td>{{l1team.l1team_name}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

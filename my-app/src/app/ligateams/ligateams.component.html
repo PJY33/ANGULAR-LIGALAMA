@@ -1,0 +1,54 @@
+<div class="container" style="margin-top: 70px">
+  <h1>Classement des équipes</h1>
+
+  <div id="alert" *ngIf="ligateamsAlert" class="jumbotron rounded border border-danger p-3">
+    <h2 class="display-4">Des équipes sont non conformes ...</h2>
+    <p class="lead">et devront être régularisées avant le début de la prochaine journée.</p>
+    <hr class="my-4">
+    <p>En rouge : le nombre de joueur de ton effectif est incorrect car tu ne disposes pas de 12 joueurs.</p>
+    <p>En jaune : la répartition titulaires / remplaçant est incorrecte.</p>
+    <p>En bleu  : tu disposes de plus de 3 joueurs d'un même club ce qui est interdit</p>
+    <p>En gris  : ta composition ne respecte pas le 443 ou 442 ou 532 ou 541 ou 451.</p>    
+  </div>
+
+  <table class="table table-hover"style="margin-top: 40px">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Nom de l'équipe</th>
+        <th scope="col">Points</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ligateam of ligateams; index as i" routerLink="/compo/{{ligateam.id}}" [ngSwitch]="ligateam.conformity">
+        <ng-template ngSwitchCase=0>
+          <td>{{i + 1}}</td>
+          <td>{{ligateam.ligateam_name}}</td>
+          <td>{{ligateam.points}}</td>
+        </ng-template>
+        <ng-template ngSwitchCase=1>
+          <td class="table-danger">{{i + 1}}</td>
+          <td class="table-danger">{{ligateam.ligateam_name}}</td>
+          <td class="table-danger">{{ligateam.points}}</td>
+        </ng-template>
+        <ng-template ngSwitchCase=2>
+          <td class="table-warning">{{i + 1}}</td>
+          <td class="table-warning">{{ligateam.ligateam_name}}</td>
+          <td class="table-warning">{{ligateam.points}}</td>
+        </ng-template>
+        <ng-template ngSwitchCase=3>
+          <td class="table-info">{{i + 1}}</td>
+          <td class="table-info">{{ligateam.ligateam_name}}</td>
+          <td class="table-info">{{ligateam.points}}</td>
+        </ng-template>
+        <ng-template ngSwitchCase=4>
+          <td class="table-dark">{{i + 1}}</td>
+          <td class="table-dark">{{ligateam.ligateam_name}}</td>
+          <td class="table-dark">{{ligateam.points}}</td>
+        </ng-template>
+      </tr>
+    </tbody>
+  </table>
+  
+</div>
+

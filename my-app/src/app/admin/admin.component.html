@@ -1,0 +1,25 @@
+<div class="container" style="margin-top: 20px">
+    <h1> Etape 1 : import des équipes de L1</h1>
+    <div *ngIf="l1teams">
+        <h3> {{l1teams.length}} équipes sont déclarées !</h3>
+        <table class="table"style="margin-top: 40px">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Equipe importée</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let l1team of l1teams; let i = index">
+                    <td>{{i + 1}}</td>
+                    <td>{{l1team.l1team_name}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <a *ngIf="!l1teams" class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="getApiFTeamsByLeague()">Lancer</a>
+</div>
+<div class="container" style="margin-top: 20px">
+    <h2> Import des joueurs</h2>
+    <a class="btn btn-primary btn-lg active mr-1" role="button" aria-pressed="true" (click)="getApiFPlayersFromTeam()">Lancer</a>
+</div>

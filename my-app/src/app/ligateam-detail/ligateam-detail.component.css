@@ -1,0 +1,46 @@
+table{
+  border-collapse: collapse;
+  width: 500px;
+}
+
+.tr1 th {
+  background-color: #607D8B;
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+}
+
+.lines td{
+  background-color: #ddd;
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+  cursor: pointer;
+}
+
+.lines:hover {
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+  cursor: pointer;
+  color: #4CAF50 ;
+}
+
+.button {
+  display: block;
+  width: 25%;
+  border: none;
+  background-color: #ddd;
+  color: white;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.button:hover {
+  background-color: #4CAF50;
+  color: black;
+}
+
+

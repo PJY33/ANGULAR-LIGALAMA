@@ -1,0 +1,27 @@
+table{
+  border-collapse: collapse;
+}
+
+.tr1 th {
+  background-color: #607D8B;
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+}
+
+.tr2 td{
+  background-color: #EEE;
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+  cursor: pointer;
+}
+
+.tr2:hover {
+  border: 1px solid black;
+  padding: 10px;
+  align-content: center;
+  cursor: pointer;
+  color: red;
+}
+
