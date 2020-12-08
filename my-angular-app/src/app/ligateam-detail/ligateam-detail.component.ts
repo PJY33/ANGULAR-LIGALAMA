@@ -137,6 +137,22 @@ export class LigateamDetailComponent implements OnInit {
 
   }
 
+  sendMessage(message: string) {
+    var request = new XMLHttpRequest();
+    request.open("POST", "https://discord.com/api/webhooks/778305478513393664/UyZCJQbLC63uSYo7gZ3eCsSx5TbGYfJhYpuVdn2EPoZ61PyCtjFTYe-BEgLlGZvkQsnc");
+
+    console.log("Message à envoyer  : ", message);
+    request.setRequestHeader('Content-type', 'application/json');
+
+    var params = {
+      username: "LIGA",
+      avatar_url: "",
+      content: message,
+    }
+
+    request.send(JSON.stringify(params));
+  }
+
   updatePlayer(player: Player): void {
 
     delete (this.selectedPlayer);
@@ -171,8 +187,12 @@ export class LigateamDetailComponent implements OnInit {
         error => {
           console.log(error);
         });
+
+    // Envoi d'une notification lors du départ du joueur    
+    this.sendMessage(player.player_name.toUpperCase() + " (" + player.position + ", " + player.l1team.l1team_name + ") quitte " + this.ligateam.ligateam_name.toUpperCase());
   
   }
+
 
   // change le statut du joueur passé en param
   // first <=> substitute

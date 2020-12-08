@@ -131,7 +131,7 @@ export class RecruitmentComponent implements OnInit {
             data => {
               this.ligateam = data;
               console.log("LIGATEAM :",data);
-              this.sendMessage(coming.player_name.toUpperCase() + " rejoint " + this.ligateam.ligateam_name.toUpperCase());
+              this.sendMessage(coming.player_name.toUpperCase() + " (" + coming.position + ", " + coming.l1team.l1team_name + ") rejoint " + this.ligateam.ligateam_name.toUpperCase());
               this.router.navigate([chemin])          
             },
             error => {

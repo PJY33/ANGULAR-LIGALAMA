@@ -3,10 +3,14 @@ import { Location } from '@angular/common';
 
 import { RoundService } from '../services/round.service';
 import { PlayersService } from '../services/players.service';
+import { L1teamService } from '../services/l1team.service';
 import { GlobalVariables } from '../mocks/global-variables';
 import { ViewModelFixture } from '../models/viewModelFixtures';
 import { CalculPoints } from '../models/calculPoints';
-import { FIXTURESAPIF, STATISTICSFIXTURESAPIF } from '../mocks/mock-apif-response';
+import { FIXTURESAPIF, STATISTICSFIXTURESAPIF_NM, STATISTICSFIXTURESAPIF_RL } from '../mocks/mock-apif-response';
+import { FixturePlayer } from '../models/fixturePlayers';
+import { positionElements } from '@ng-bootstrap/ng-bootstrap/util/positioning';
+
 
 @Component({
   selector: 'app-round',
@@ -24,6 +28,7 @@ export class RoundComponent implements OnInit {
   fixtureEndDate: number;
   myRound: string;
   player: any[] = Array();    // tableau comportant une valeur unique (contrainte SEQUELIZE)
+  playersList: FixturePlayer[] = []; 
 
   // Variables utilisées pour le calcul des points d'un joueur
   teamPoint: number;
@@ -32,7 +37,7 @@ export class RoundComponent implements OnInit {
   playerPlayed: number; 
   playerScoredAndMultiScored: number;
   playerKeyGoal: number;
-  playerKeyPassed: number;
+  playerKeyPass: number;
   playerPenalty: number;
   playerRedCard: number;
   totalPoint: number = 0;
@@ -41,6 +46,7 @@ export class RoundComponent implements OnInit {
   constructor(
     private location: Location,
     private roundService : RoundService,
+    private l1teamService : L1teamService,
     private playersService : PlayersService,
     private globalVariables: GlobalVariables,
   ) { }
@@ -54,17 +60,23 @@ export class RoundComponent implements OnInit {
   }
 
   getCurrentRound(): void {
+    
+    // à remplacer par
+    //console.log("this.globalVariables.league_idapif",this.globalVariables.league_idapif);
+    //this.getFixtures(this.globalVariables.league_idapif, "inutile");
+    
     this.roundService.getApiFCurrentRound(this.globalVariables.league_idapif)
     .subscribe(
         data => {
         this.myRound = data.api.fixtures[0];
-//        console.log(JSON.stringify(data));
-//        console.log("currentRound : ",this.myRound);
+        console.log(JSON.stringify(data));
+        console.log("currentRound : ",this.myRound);
         this.getFixtures(this.globalVariables.league_idapif, this.myRound);
       },
       error => {
         console.log(error);
       });
+    
   }
 
   onRoundSelection(round: number): void {
@@ -87,7 +99,7 @@ export class RoundComponent implements OnInit {
     //    console.log("FIXTURESAPIF (APIF) :  : ",this.fixtures);
 
         for (let fixture of this.fixtures) {
-          console.log("fixture : ", fixture);
+          //console.log("fixture : ", fixture);
           if (fixture.statusShort == "NS") {
             this.viewModelFixtures.push({
               fixture_id: fixture.fixture_id,
@@ -130,53 +142,126 @@ export class RoundComponent implements OnInit {
     //  });
          
   }
-  
-  onSelectViewModelFixture(viewModelFixture: ViewModelFixture): void {
 
-    console.log("viewModelFixture : ",viewModelFixture);  
-    // à remplacer par le code commenté qui est un bouchon    
-    this.statisticFixturePlayers = STATISTICSFIXTURESAPIF.api.players;
-    console.log("STATISTICSFIXTURESAPIF (bouchon) : ",this.statisticFixturePlayers);   
-    
-    //this.roundService.getStatisticsFixtures(viewModelFixture.fixture_id)
-    //.subscribe(
-    //    data => {
-    //    this.statisticFixturePlayers = data.api.players;
-    //    console.log("STATISTICSFIXTURESAPIF (APIF) : ", data);
-        // console.log(JSON.stringify(data));
-    
-        for (let statisticFixturePlayer of this.statisticFixturePlayers) {
-
-          this.playersService.getPlayer(statisticFixturePlayer.player_id)
-          .subscribe(
-              player => {
-                this.player = player;
-                //console.log("this.players.length : ", this.players.length);
-
-                if (this.player.length == 1 && this.player[0].player_idapif == statisticFixturePlayer.player_id) {
-
-                  // ============================
-                  // Calcul des points du joueur
-                  // ============================
-                  console.log("player BDD: ",this.player);
-                  console.log("viewModelFixture : ",viewModelFixture);
-                  console.log("statisticFixturePlayer : ",statisticFixturePlayer);    
-                  
-                  this.calcul(viewModelFixture, statisticFixturePlayer, this.player[0]);
-                  
-                } else { 
-                  console.log("ERREUR : Impossible de retrouver le joueur")
-                }
-              },
-              error => {
-                console.log(error);
-              });
-        }
-      //},
-      //error => {
-      //  console.log(error);
-      //});
+  private delay(ms: number)
+  {
+    /// sans le delay ça coince ...    
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
+  
+  async onSelectViewModelFixture(viewModelFixture: ViewModelFixture) {
+    
+    
+    // Etape 1 : récupérer la liste des joueurs des 2 clubs
+    let fixturePlayersList: FixturePlayer[] = [];
+    fixturePlayersList = await this.getPlayers(fixturePlayersList, viewModelFixture.homeTeam_id, "home", false);
+    fixturePlayersList = await this.getPlayers(fixturePlayersList, viewModelFixture.awayTeam_id, "away", false);
+    console.log("fixturePlayersList",fixturePlayersList);
+    
+    // Etape 2 : récupérer les stats de la fixture
+    let statisticFixturePlayers: any[] = [];    
+    statisticFixturePlayers = await this.getStatisticFixtureTraitement(viewModelFixture.fixture_id);
+    console.log("statisticFixturePlayers",statisticFixturePlayers);
+  
+    // Etape 3 : pour sur les stats de chaque joueur
+    this.boucle(statisticFixturePlayers, viewModelFixture, fixturePlayersList);
+
+    // tempo bien pourrie mais je n'ai pas trouvé d'autres solutions pour l'instant
+    await this.delay(10000);
+
+    console.log("FIN du traitement : fixturePlayersList = ",this.playersList);
+    //TODO : créer les playersrounds
+    // -3 pour les milieux et attaquants 
+    // -4 pour les gardiens et défenseurs 
+
+  }
+
+  boucle(statisticFixturePlayers: any, viewModelFixture: ViewModelFixture, fixturePlayersList: FixturePlayer[]) {
+
+      for (let statisticFixturePlayer of statisticFixturePlayers) {
+        // Etape 4 : récupérer le joueur correspondant en base
+        this.playersPointCalcul(statisticFixturePlayer, viewModelFixture, fixturePlayersList);
+      }
+
+  }
+
+
+  getPlayers(fixturePlayersList: FixturePlayer[], teamId: number, type:string, hasPlayed: boolean): FixturePlayer[] {
+    
+    // constitution de la liste des joueurs des 2 équipes
+    this.l1teamService.getL1team(teamId)
+    .subscribe(
+        data => {         
+
+          // ajout des joueurs de l'équipe dans la liste des joueurs
+          let players: any[] = data[0].players;
+          
+          for (let player of players) {
+            fixturePlayersList.push({playeridapif: player.player_idapif, homeOrAway: type, position: player.position, played: hasPlayed});
+          };
+          
+        },
+        error => {
+          console.log(error);
+        });
+        return fixturePlayersList;
+
+  }
+
+  playersPointCalcul(statisticFixturePlayer: any, viewModelFixture: ViewModelFixture, fixturePlayersList: FixturePlayer[]) {
+
+    this.playersService.getPlayer(statisticFixturePlayer.player_id)
+    .subscribe(
+      data => {
+        console.log("player : ", data);
+        this.player=data;
+
+        if (this.player.length == 1 && this.player[0].player_idapif == statisticFixturePlayer.player_id) {
+
+          // ============================
+          // Calcul des points du joueur
+          // ============================
+          //console.log("player BDD: ",this.player);
+          //console.log("viewModelFixture : ",viewModelFixture);
+          //console.log("statisticFixturePlayer : ",statisticFixturePlayer);      
+          this.calcul(viewModelFixture, statisticFixturePlayer, this.player[0], fixturePlayersList);
+          
+        } else { 
+          console.log("ERREUR : ce cas ne doit pas se produire !")
+        }
+      },
+      error => {
+        console.log(error);
+      }); 
+
+      
+
+}
+
+
+  getStatisticFixtureTraitement(fixtureId: number): any[] {
+
+
+      // à remplacer par le code commenté qui est un bouchon    
+      this.statisticFixturePlayers = STATISTICSFIXTURESAPIF_NM.api.players;
+      console.log("STATISTICSFIXTURESAPIF_NM (bouchon) : ",this.statisticFixturePlayers); 
+      return this.statisticFixturePlayers;
+
+      //this.roundService.getStatisticsFixtures(viewModelFixture.fixture_id)
+      //.subscribe(
+      //    data => {
+      //    this.statisticFixturePlayers = data.api.players;
+      //    console.log("STATISTICSFIXTURESAPIF (APIF) : ", data);
+      //    console.log(JSON.stringify(data));  
+      //    return this.statisticFixturePlayers;      
+      //  },
+      //  error => {
+      //    console.log(error);
+      //  });
+  }
+
+
+
     
 
 
@@ -184,7 +269,7 @@ export class RoundComponent implements OnInit {
 // Calcul des points des joueurs
 // ==============================
 
-  async calcul(viewModelFixture: ViewModelFixture, statisticFixturePlayer: any, player: any) {
+  async calcul(viewModelFixture: ViewModelFixture, statisticFixturePlayer: any, player: any, fixturePlayersList: FixturePlayer[]) {
 
     // Appels successifs pour calculer tous les types de points
     this.teamPoint = await this.calculTeamPoint(viewModelFixture, statisticFixturePlayer);
@@ -194,7 +279,7 @@ export class RoundComponent implements OnInit {
     this.playerScoredAndMultiScored = await this.calculplayerScoredAndMultiScored(statisticFixturePlayer, player);
     this.playerPenalty = await this.calculplayerPenalty(statisticFixturePlayer, player);
     this.playerRedCard = await this.calculplayerRedCard(statisticFixturePlayer);
-    this.playerKeyPassed = await this.calculplayerKeyPassed(statisticFixturePlayer);
+    this.playerKeyPass = await this.calculplayerKeyPass(statisticFixturePlayer);
 
     console.log('teamPoint = ',this.teamPoint);
     console.log('teamGoalDifferencePoint = ',this.teamGoalDifferencePoint);
@@ -203,13 +288,23 @@ export class RoundComponent implements OnInit {
     console.log('playerScoredAndMultiScored = ',this.playerScoredAndMultiScored);
     console.log('playerPenalty = ',this.playerPenalty);
     console.log('playerRedCard = ',this.playerRedCard);
-    console.log('playerKeyPassed = ',this.playerKeyPassed);
+    console.log('playerKeyPass = ',this.playerKeyPass);
 
-    this.totalPoint = this.teamPoint + this.teamGoalDifferencePoint + this.teamGoalConceded + this.playerPlayed + this.playerScoredAndMultiScored + this.playerPenalty + this.playerRedCard + this.playerKeyPassed;
+    this.totalPoint = this.teamPoint + this.teamGoalDifferencePoint + this.teamGoalConceded + this.playerPlayed + this.playerScoredAndMultiScored + this.playerPenalty + this.playerRedCard + this.playerKeyPass;
     console.log('TOTAL de ',statisticFixturePlayer.player_name, ' = ',this.totalPoint);
     console.log('=============================');
 
     //TODO = MAJ de la BDD playersrounds
+    let index: number = 0;
+    while (index < fixturePlayersList.length && fixturePlayersList[index].playeridapif != statisticFixturePlayer.player_id) {
+      index += 1;
+    }
+    if (fixturePlayersList[index].playeridapif == statisticFixturePlayer.player_id) {
+      fixturePlayersList[index].played = true;
+      console.log("Marqué comme ayant joué : ",statisticFixturePlayer.player_name,"  ",statisticFixturePlayer.player_id);      
+    }
+    
+    this.playersList = fixturePlayersList;
 
   }
 
@@ -354,7 +449,7 @@ export class RoundComponent implements OnInit {
     return point;  
   }
 
-  calculplayerKeyPassed(statisticFixturePlayer: any) {
+  calculplayerKeyPass(statisticFixturePlayer: any) {
     // =================================================================================
     // Passe décisive : +2
     // =================================================================================
@@ -408,3 +503,4 @@ export class RoundComponent implements OnInit {
   }
 
 }
+

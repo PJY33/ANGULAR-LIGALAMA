@@ -106,21 +106,46 @@ export class ImportComponent implements OnInit {
 
   }
 
-  async onSelectL1Team(l1team: L1team) {
+  onSelectL1Team(l1team: L1team) {
 
     this.playersService.getApiFPlayersFromTeam(l1team.team_idapif, this.globalVariables.season_apif)
       .subscribe(
         data => {
           this.l1team = l1team;
           this.playersApiF = data.api.players;
-          
-          let i = 0;
+          console.log("this.playersApiF (TOUS APIF)",this.playersApiF)
+        
           // création ou MAJ des joueurs en base
           for (let playerApiF of this.playersApiF) {  
-            this.playerImport(playerApiF);
-            i++; 
+            
+            //console.log("playerApiF UNIQUE: ", playerApiF);
+            this.playersService.getPlayer(playerApiF.player_id)
+            .subscribe(
+              data => {
+                this.player = data;
+                // console.log("this.player (BDD): ", this.player);
+                if (this.player.length == 1) {
+                   //console.log("un joueur est trouvé en base avec l'id APIF");
+                   //console.log("this.players[0].player_idapif : ", this.players[0].player_idapif);
+                   if (this.player[0].player_idapif == playerApiF.player_id) {
+                     //udatePlayer
+                     //this.updateplayer(this.player[0].id, playerApiF);
+                   } else {
+                     console.log("ERREUR : Impossible de retrouver le joueur")
+                   }          
+                  
+                } else if (this.player.length == 0) {
+                  /// createPlayer
+                  //this.createplayer(playerApiF);
+                };
+        
+              },
+              error => {
+                console.log(error);
+              });            
+
           };
-          this.message = i + ' joueurs de ' + l1team.l1team_name + ' ont été importés ou mis à jour';
+//          this.message = 'Pour ' + l1team.l1team_name + ', ' + createNumber + ' création(s) / ' + updateNumber + ' modification(s) / ' + errorNumber + ' erreur(s)';
           
         },
         error => {
@@ -150,51 +175,18 @@ export class ImportComponent implements OnInit {
         });
   }
 
-  playerImport(playerApiF: any) {
-    
-    console.log("playerImport()");
-    console.log("param playerApiF : ", playerApiF);
-    console.log("param l1team : ", this.l1team);
-    this.playersService.getPlayer(playerApiF.player_id)
-    .subscribe(
-      data => {
-        this.player = data;
-        //console.log("this.players.length : ", this.players.length);
-        if (this.player.length == 1) {
-           //console.log("un joueur est trouvé en base avec l'id APIF");
-           //console.log("this.players[0].player_idapif : ", this.players[0].player_idapif);
-           if (this.player[0].player_idapif == playerApiF.player_id) {
-             //udatePlayer
-             this.updateplayer(playerApiF);
-           } else { 
-             console.log("ERREUR : Impossible de retrouver le joueur")
-           }          
-          
-        } else if (this.player.length == 0) {
-          /// createPlayer
-          this.createplayer(playerApiF);
-        };
 
-      },
-      error => {
-        console.log(error);
-      });
+  updateplayer(playerid: number, playerApiF: any) {
 
-  }
-  
-
-  updateplayer(playerApiF: any) {
-
-    console.log("UPDATE d'un joueur existant", playerApiF);
+    //console.log("UPDATE d'un joueur existant", playerApiF.player_name, playerApiF, "this.l1team.id : ", this.l1team.id, "playerid", playerid);
     const PlayerData = {
       player_idapif: playerApiF.player_id,
       player_name: playerApiF.player_name,
       position: playerApiF.position,
       l1teamId: this.l1team.id,       
     };
-    //console.log("this.players[0].id", this.players[0].id);
     //console.log("PlayerData", PlayerData);
-    this.playersService.putPlayer(this.players[0].id, PlayerData)
+    this.playersService.putPlayer(playerid, PlayerData)
       .subscribe(
         data => {
           this.player = data;
@@ -208,7 +200,7 @@ export class ImportComponent implements OnInit {
 
   createplayer(playerApiF: any) {
 
-    console.log("CREATION d'un nouveau joueur", playerApiF);
+    //console.log("CREATION d'un nouveau joueur", playerApiF);
     //création d'un joueur en base
     const playerData = {
       player_idapif: playerApiF.player_id,

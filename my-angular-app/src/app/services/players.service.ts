@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
+const playersroundsBaseUrl = 'http://localhost:8080/api/playerround';
 const playersBaseUrl = 'http://localhost:8080/api/players';
 const apiFPlayersBaseUrl = 'https://api-football-v1.p.rapidapi.com/v2';
 
@@ -42,6 +43,10 @@ export class PlayersService {
 
   putPlayer(id: number, data: any): Observable<any> {
     return this.http.put(`${playersBaseUrl}/${id}`, data);
+  }
+
+  createPlayerRound(data: any): Observable<any> {
+    return this.http.post(`${playersroundsBaseUrl}`, data);
   }
 
   deletePlayer(id: number): Observable<any> {

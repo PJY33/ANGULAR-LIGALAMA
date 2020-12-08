@@ -5,8 +5,8 @@
             <option selected>Sélectionner une journée de championnat</option>
             <option *ngFor="let round of rounds" (click)="onRoundSelection(round)">{{round}}</option>
         </select>
+        <h1>Liste des matchs ({{fixtureStartDate | date:'MMM d'}} - {{fixtureEndDate | date:'MMM d'}}) </h1>
         <div class="container" style="margin-top: 40px">
-            <h1>Liste des matchs ({{fixtureStartDate | date:'MMM d'}} - {{fixtureEndDate | date:'MMM d'}}) </h1>
             <table *ngIf="isViewModelVisible" class="table table-hover" style="margin-top: 20px">
                 <thead>
                     <tr>
